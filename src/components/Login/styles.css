@@ -1,0 +1,130 @@
+/* styles.css - Christmas Edition */
+
+/* 1. Hình nền toàn trang */
+.login-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+  /* Tạo nền gradient đỏ/xanh đậm chất giáng sinh */
+  background: linear-gradient(135deg, #8e0e00 10%, #1f4037 100%);
+  /* Tùy chọn: Nếu bạn muốn dùng ảnh nền, hãy bỏ chú thích dòng dưới và thay link ảnh */
+  /* background: url('https://source.unsplash.com/featured/?christmas,bokeh') no-repeat center center/cover; */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hiệu ứng tuyết rơi nhẹ (giả lập bằng dấu chấm) */
+.login-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: snow 10s linear infinite;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+@keyframes snow {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 200px; }
+}
+
+/* 2. Thẻ Card chứa form */
+.login-card.MuiPaper-root {
+  width: 100%;
+  max-width: 380px; /* Rộng hơn xíu cho thoáng */
+  padding: 30px 25px;
+  border-radius: 16px;
+  box-sizing: border-box;
+  /* Màu nền kem ấm áp, hơi trong suốt */
+  background-color: rgba(255, 252, 245, 0.95) !important;
+  /* Viền vàng kim loại */
+  border: 2px solid #d4af37; 
+  /* Hiệu ứng đổ bóng ấm cúng */
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3), 0 0 20px rgba(142, 14, 0, 0.2) !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- TÙY CHỈNH CÁC COMPONENT CỦA MUI --- */
+/* Lưu ý: Cần dùng !important để ghi đè style mặc định của MUI */
+
+/* 3. Tabs (Login/Register) */
+/* Màu chữ của Tab khi chưa chọn */
+.MuiTab-root {
+  color: #1f4037 !important; /* Xanh đậm */
+  font-weight: 600 !important;
+}
+/* Màu chữ của Tab khi ĐANG chọn */
+.MuiTab-root.Mui-selected {
+  color: #c0392b !important; /* Đỏ đậm */
+}
+/* Thanh gạch chân dưới Tab */
+.MuiTabs-indicator {
+  background-color: #c0392b !important; /* Đỏ đậm */
+  height: 3px !important;
+}
+
+/* 4. TextField (Ô nhập liệu) */
+/* Màu label (nhãn) khi đang focus vào ô */
+.MuiInputLabel-root.Mui-focused {
+  color: #1f4037 !important; /* Xanh đậm */
+}
+/* Thanh gạch chân input khi focus */
+.MuiInput-underline:after {
+  border-bottom-color: #1f4037 !important; /* Xanh đậm */
+}
+
+/* 5. Button (Nút bấm) */
+.MuiButton-contained {
+  /* Nền đỏ đậm */
+  background: linear-gradient(45deg, #8e0e00, #c0392b) !important;
+  color: #fff !important; /* Chữ trắng */
+  font-weight: bold !important;
+  font-size: 1rem !important;
+  border-radius: 25px !important; /* Bo tròn nút hơn */
+  border: 1px solid #d4af37 !important; /* Viền vàng mỏng */
+  box-shadow: 0 4px 10px rgba(142, 14, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Hiệu ứng khi di chuột vào nút */
+.MuiButton-contained:hover:not(:disabled) {
+  background: linear-gradient(45deg, #a61200, #d64535) !important;
+  box-shadow: 0 6px 15px rgba(212, 175, 55, 0.5) !important; /* Phát sáng vàng */
+  transform: translateY(-2px);
+}
+
+/* Nút khi bị disable (đang loading) */
+.MuiButton-contained.Mui-disabled {
+  background: #e0e0e0 !important;
+  color: #9e9e9e !important;
+  border: none !important;
+}
+
+/* Màu của vòng tròn loading */
+.MuiCircularProgress-circle {
+  color: #ffffff !important;
+}
+
+/* Màu thông báo lỗi */
+.MuiTypography-colorError {
+    color: #d32f2f !important;
+    font-weight: 500;
+    background-color: rgba(211, 47, 47, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+}

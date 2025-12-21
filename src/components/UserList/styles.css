@@ -1,0 +1,67 @@
+/* components/UserList/styles.css */
+
+/* Khung bao ngoài (Card) */
+.user-list-card {
+  height: 100%;
+  border-radius: 16px !important;
+  background-color: #fffcf5 !important; /* Màu kem */
+  border: 2px solid #d4af37 !important;  /* Viền vàng */
+  box-shadow: 0 8px 20px rgba(31, 64, 55, 0.15) !important;
+  position: relative;
+  overflow: hidden;
+  padding-top: 10px;
+}
+
+/* Tiêu đề danh sách */
+.list-header {
+  color: #8e0e00 !important; /* Đỏ đậm */
+  font-weight: bold !important;
+  font-family: "Brush Script MT", cursive, sans-serif !important;
+  text-align: center;
+  padding: 16px 0;
+  border-bottom: 2px dashed #d4af37;
+  margin-bottom: 10px !important;
+}
+
+/* Từng dòng User (ListItem) */
+.christmas-list-item {
+  transition: all 0.3s ease;
+  margin: 4px 10px;
+  border-radius: 8px;
+  width: auto !important; /* Để margin hoạt động */
+  border: 1px solid transparent;
+}
+
+/* Hiệu ứng khi di chuột vào tên */
+.christmas-list-item:hover {
+  background-color: rgba(31, 64, 55, 0.1); /* Xanh nhạt */
+  border-color: #1f4037;
+  transform: translateX(5px); /* Dịch chuyển nhẹ sang phải */
+}
+
+/* Link (Thẻ a) */
+.user-link {
+  text-decoration: none;
+  color: #1f4037; /* Xanh lá đậm */
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Tên User */
+.user-name-text {
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+}
+
+/* Đường kẻ phân cách (Divider) */
+.christmas-divider {
+  background-color: rgba(212, 175, 55, 0.3) !important; /* Vàng mờ */
+  margin: 0 16px !important;
+}
+
+/* Icon tuần lộc/chuông (trang trí) */
+.list-icon {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
