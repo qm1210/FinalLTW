@@ -14,7 +14,7 @@ import { useLocation, useParams, useNavigate } from "react-router-dom";
 // import fetchModel from "../../lib/fetchModelData"; 
 import "./styles.css";
 
-// ✅ Link Backend của bạn
+// ✅ Link Backend
 const BASE = "https://q75ylp-8080.csb.app";
 
 function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
@@ -22,16 +22,15 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
   const { userId } = useParams();
   const navigate = useNavigate();
 
-  // Thêm icon bông tuyết vào tên
   const [rightText, setRightText] = React.useState("Phạm Nguyễn Quang Minh - B22DCAT193");
 
-  // ✅ modal add photo
+  // Modal add photo
   const [openAdd, setOpenAdd] = React.useState(false);
   const [selectedFile, setSelectedFile] = React.useState(null);
   const [uploading, setUploading] = React.useState(false);
 
 
-  // ✅ upload trong modal
+  // Upload handler
   const handleUpload = async () => {
     if (!selectedFile) return;
 
@@ -51,16 +50,16 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
 
       if (!res.ok) throw new Error(await res.text());
 
-      // báo để UserPhotos tự hiện ảnh mới
+      // Notify UserPhotos to refresh
       onUploadSuccess && onUploadSuccess();
 
-      // đóng modal + reset
+      // Close modal and reset
       setOpenAdd(false);
       setSelectedFile(null);
-      alert("🎄 Upload ảnh thành công! Giáng sinh an lành! 🎄");
+      alert("Photo uploaded successfully!");
     } catch (err) {
       console.error(err);
-      alert("Lỗi upload rồi :(");
+      alert("Upload failed");
     } finally {
       setUploading(false);
     }
@@ -73,6 +72,8 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
         credentials: "include",
       });
     } catch {}
+    // Clear localStorage
+    localStorage.removeItem('loggedInUser');
     setLoggedInUser(null);
     navigate("/users");
   };
@@ -81,28 +82,25 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
     <>
       <AppBar position="static" className="topbar-appBar">
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="h6" color="inherit" sx={{fontFamily: 'cursive'}}>
+          <Typography variant="h5" fontFamily="arial" color="black">
             {rightText}
           </Typography>
 
           {loggedInUser ? (
             <div className="topbar-right">
-
-              {/* ✅ Nút Add Photo */}
               <Button
                 className="topbar-add-btn"
                 variant="contained"
                 onClick={() => setOpenAdd(true)}
-                startIcon={<span>📸</span>}
               >
-                Thêm Ảnh
+                Add Photo
               </Button>
               
               <Typography
                 className="topbar-greeting"
                 variant="subtitle1"
               >
-                Hi, {loggedInUser.first_name} 🎅
+                Hi, {loggedInUser.first_name}
               </Typography>
 
               <Button
@@ -114,16 +112,15 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
               </Button>
             </div>
           ) : (
-            <Typography variant="subtitle1" color="inherit">
-              Please Login 🎄
+            <Typography variant="subtitle1" color="black">
+              Please Login
             </Typography>
           )}
         </Toolbar>
       </AppBar>
 
-      {/* ✅ MODAL Giáng sinh */}
       <Dialog open={openAdd} onClose={() => !uploading && setOpenAdd(false)}>
-        <DialogTitle>🎄 New Christmas Photo 🎄</DialogTitle>
+        <DialogTitle>New Photo</DialogTitle>
 
         <DialogContent>
           <div style={{marginTop: '20px', textAlign: 'center'}}>
@@ -133,16 +130,16 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
               onChange={(e) => setSelectedFile(e.target.files[0])}
               style={{
                   padding: '10px', 
-                  border: '1px dashed #1f4037', 
+                  border: '1px solid #1976d2', 
                   width: '100%',
-                  borderRadius: '8px',
-                  background: '#f0fff4'
+                  borderRadius: '6px',
+                  background: '#f5f5f5'
               }}
             />
           </div>
           {!selectedFile && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
-              Hãy chọn một bức ảnh kỷ niệm tuyệt đẹp nhé!
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              Select a photo to upload
             </Typography>
           )}
         </DialogContent>
@@ -154,7 +151,6 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
               setSelectedFile(null);
             }}
             disabled={uploading}
-            style={{color: '#8e0e00'}}
           >
             Cancel
           </Button>
@@ -163,12 +159,11 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
             variant="contained"
             onClick={handleUpload}
             disabled={!selectedFile || uploading}
-            style={{backgroundColor: '#1f4037', color: 'white'}}
           >
             {uploading ? (
               <CircularProgress size={18} color="inherit" />
             ) : (
-              "Upload ✨"
+              "Upload"
             )}
           </Button>
         </DialogActions>

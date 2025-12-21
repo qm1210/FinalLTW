@@ -1,40 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useImperativeHandle } from "react";
 import { Typography, Box, TextField, Button, CircularProgress } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
-import "./styles.css"; // ✅ Import CSS Giáng sinh
+import "./styles.css";
 
-// ✅ Link Backend chuẩn
+// Backend URL
 const BASE = "https://q75ylp-8080.csb.app";
 
-function UserPhotos({ loggedInUser }) {
+const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
   const { userId } = useParams();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Lưu text comment theo từng photo
+  // Store comments by photo ID
   const [newComments, setNewComments] = useState({});
 
-  // ✅ Fetch Photos từ API thật
+  // Fetch Photos
+  const getPhotos = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/photo/${userId}`, {
+         credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to fetch photos");
+      const data = await res.json();
+      setPhotos(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const getPhotos = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`${BASE}/api/photo/${userId}`, {
-           credentials: "include"
-        });
-        if (!res.ok) throw new Error("Failed to fetch photos");
-        const data = await res.json();
-        setPhotos(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     getPhotos();
   }, [userId]);
 
-  // ✅ Submit Comment
+  // Expose refetch function to parent
+  useImperativeHandle(ref, () => ({
+    refetch: getPhotos,
+  }));
+
+  // Submit comment
   const handleAddComment = async (photoId) => {
     const text = (newComments[photoId] || "").trim();
     if (!text) return;
@@ -57,7 +63,7 @@ function UserPhotos({ loggedInUser }) {
 
       const createdComment = await res.json(); 
 
-      // Update UI ngay lập tức
+      // Update UI
       setPhotos((prevPhotos) =>
         prevPhotos.map((p) =>
           p._id === photoId
@@ -85,16 +91,16 @@ function UserPhotos({ loggedInUser }) {
       setNewComments((prev) => ({ ...prev, [photoId]: "" }));
     } catch (e) {
       console.error(e);
-      alert("Không thể gửi bình luận 😔");
+      alert("Failed to post comment");
     }
   };
 
-  if (loading) return <Box p={3} textAlign="center"><CircularProgress style={{color: '#8e0e00'}} /></Box>;
+  if (loading) return <Box p={3} textAlign="center"><CircularProgress style={{color: '#1976d2'}} /></Box>;
 
   if (!photos.length)
     return (
-      <Typography align="center" mt={4} style={{color: '#8e0e00', fontStyle: 'italic'}}>
-        Chưa có tấm ảnh nào trong album Giáng sinh này ❄️
+      <Typography align="center" mt={4} style={{color: '#666'}}>
+        No photos yet
       </Typography>
     );
 
@@ -103,37 +109,31 @@ function UserPhotos({ loggedInUser }) {
       {photos.map((photo) => (
         <div key={photo._id} className="christmas-photo-card">
           
-          {/* --- NGÀY GIỜ --- */}
           <Typography className="photo-date">
-            📅 {new Date(photo.date_time).toLocaleString()} ❄️
+            {new Date(photo.date_time).toLocaleString()}
           </Typography>
 
-          {/* --- HIỂN THỊ ẢNH --- */}
           <img 
             src={`${BASE}/images/${photo.file_name}`}
             alt={photo.file_name}
             className="photo-frame"
           />
 
-          {/* --- PHẦN BÌNH LUẬN --- */}
           <div className="comments-section">
             
-            {/* Danh sách comment */}
             <Box mb={2}>
               {photo.comments && photo.comments.length > 0 ? (
                 photo.comments.map((c) => (
                   <div key={c._id} className="comment-bubble">
                     <Typography variant="body2">
-                      {/* Tên người comment */}
                       {c.user ? (
                         <Link to={`/users/${c.user._id}`} className="comment-author">
-                          🎄 {c.user.first_name} {c.user.last_name}:
+                          {c.user.first_name} {c.user.last_name}:
                         </Link>
                       ) : (
                         <span style={{ color: "gray", fontWeight: "bold" }}>Unknown: </span>
                       )}
                       
-                      {/* Nội dung comment */}
                       {c.comment}
                     </Typography>
                     
@@ -143,18 +143,17 @@ function UserPhotos({ loggedInUser }) {
                   </div>
                 ))
               ) : (
-                <Typography variant="body2" color="text.secondary" fontStyle="italic">
-                  Chưa có lời cmt nào... Hãy là người đầu tiên! 
+                <Typography variant="body2" color="text.secondary">
+                  No comments yet. Be the first!
                 </Typography>
               )}
             </Box>
 
-            {/* Ô nhập comment mới */}
             <Box display="flex" gap={1}>
               <TextField
                 fullWidth
                 size="small"
-                placeholder="cmt gì đi chứ... 🎁"
+                placeholder="Add a comment..."
                 value={newComments[photo._id] || ""}
                 onChange={(e) =>
                   setNewComments((prev) => ({
@@ -167,7 +166,7 @@ function UserPhotos({ loggedInUser }) {
                 }}
                 sx={{
                     '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#1f4037', // Viền xanh khi focus
+                        borderColor: '#1976d2',
                     }
                 }}
               />
@@ -178,7 +177,7 @@ function UserPhotos({ loggedInUser }) {
                 onClick={() => handleAddComment(photo._id)}
                 disabled={!(newComments[photo._id] || "").trim()}
               >
-                Gửi 🎅
+                Post
               </Button>
             </Box>
 
@@ -187,6 +186,7 @@ function UserPhotos({ loggedInUser }) {
       ))}
     </div>
   );
-}
+});
 
+UserPhotos.displayName = 'UserPhotos';
 export default UserPhotos;

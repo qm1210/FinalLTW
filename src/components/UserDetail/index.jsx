@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Box, Button, Paper, CircularProgress } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
-import "./styles.css"; // ✅ Import file CSS vừa tạo
+import "./styles.css";
 
-// ✅ Link Backend chuẩn
+// Backend URL
 const BASE = "https://q75ylp-8080.csb.app";
 
 function UserDetail() {
@@ -11,11 +11,10 @@ function UserDetail() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Gọi API
+  // Fetch user data
   useEffect(() => {
     const getUser = async () => {
       try {
-        // ✅ THÊM DÒNG NÀY
         const res = await fetch(`${BASE}/api/user/${userId}`, {
            credentials: "include" 
         });
@@ -40,47 +39,37 @@ function UserDetail() {
     );
 
   if (!user) 
-    return <div className="error-text">Không tìm thấy người dùng ☃️</div>;
+    return <div className="error-text">User not found</div>;
 
   return (
     <div className="user-detail-container">
-      {/* 🎄 TẤM THIỆP USER DETAIL 🎄 */}
       <Paper elevation={6} className="christmas-card">
-        
-        {/* Dải ruy băng trang trí */}
-        <div className="christmas-ribbon" />
-
-        {/* --- TIÊU ĐỀ TÊN --- */}
         <Typography variant="h4" className="user-name">
-          🎅 {user.first_name} {user.last_name} 🎄
+          {user.first_name} {user.last_name}
         </Typography>
 
-        {/* --- THÔNG TIN CHI TIẾT --- */}
         <Box>
-          {/* Nghề nghiệp */}
           <div className="info-row">
             <Typography variant="h6" className="info-label">
-              🛠 Nghề nghiệp:
+              Occupation:
             </Typography>
             <Typography variant="body1" className="info-value">
               {user.occupation}
             </Typography>
           </div>
 
-          {/* Địa điểm */}
           <div className="info-row">
             <Typography variant="h6" className="info-label">
-              📍 Địa điểm:
+              Location:
             </Typography>
             <Typography variant="body1" className="info-value">
               {user.location}
             </Typography>
           </div>
 
-          {/* Mô tả */}
           <div className="description-section">
             <Typography variant="h6" className="info-label" style={{ marginBottom: '8px' }}>
-              📝 Giới thiệu:
+              Description:
             </Typography>
             <div className="description-box">
               "{user.description}"
@@ -88,15 +77,13 @@ function UserDetail() {
           </div>
         </Box>
 
-        {/* --- NÚT XEM ẢNH --- */}
         <div className="view-photos-container">
           <Link to={`/photos/${user._id}`} style={{ textDecoration: "none" }}>
             <Button variant="contained" className="view-photos-btn">
-               Xem bộ sưu tập ảnh 🎁
+              View Photos
             </Button>
           </Link>
         </div>
-
       </Paper>
     </div>
   );

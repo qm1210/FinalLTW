@@ -8,10 +8,27 @@ import TopBar from "./components/TopBar";
 import UserDetail from "./components/UserDetail";
 import UserList from "./components/UserList";
 import UserPhotos from "./components/UserPhotos";
+import UserComments from "./components/UserComments";
 import Login from "./components/Login";
 
 const App = (props) => {
-  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [loggedInUser, setLoggedInUser] = useState(() => {
+    // Restore user from localStorage on app load
+    const saved = localStorage.getItem('loggedInUser');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const userPhotosRef = React.useRef(null);
+  const userListRef = React.useRef(null);
+
+  const handleUploadSuccess = () => {
+    if (userPhotosRef.current) {
+      userPhotosRef.current.refetch();
+    }
+    // Refresh bubble stats
+    if (userListRef.current) {
+      userListRef.current.refreshStats();
+    }
+  };
 
   return (
     <Router>
@@ -21,6 +38,7 @@ const App = (props) => {
             <TopBar
               loggedInUser={loggedInUser}
               setLoggedInUser={setLoggedInUser}
+              onUploadSuccess={handleUploadSuccess}
             />
           </Grid>
 
@@ -35,7 +53,7 @@ const App = (props) => {
             <>
               <Grid item sm={3}>
                 <Paper className="main-grid-item">
-                  <UserList loggedInUser={loggedInUser} />
+                  <UserList ref={userListRef} loggedInUser={loggedInUser} />
                 </Paper>
               </Grid>
 
@@ -48,7 +66,11 @@ const App = (props) => {
                     />
                     <Route
                       path="/photos/:userId"
-                      element={<UserPhotos loggedInUser={loggedInUser} />}
+                      element={<UserPhotos ref={userPhotosRef} loggedInUser={loggedInUser} />}
+                    />
+                    <Route
+                      path="/comments/:userId"
+                      element={<UserComments loggedInUser={loggedInUser} />}
                     />
                     <Route
                       path="*"

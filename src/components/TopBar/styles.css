@@ -1,37 +1,12 @@
-/* styles.css - Christmas TopBar Edition */
+/* styles.css - TopBar Minimal */
 
 /* 1. Thanh AppBar chính */
 .topbar-appBar {
-  /* Gradient đỏ sang xanh cực đậm đà */
-  background: linear-gradient(90deg, #8e0e00 0%, #1f4037 100%) !important;
-  /* Viền vàng kim loại phía dưới */
-  border-bottom: 3px solid #d4af37;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
   position: relative;
   overflow: hidden;
-}
-
-/* Hiệu ứng lấp lánh nhẹ trên thanh Bar */
-.topbar-appBar::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shine 6s infinite;
-}
-
-@keyframes shine {
-  0% { left: -100%; }
-  20% { left: 200%; }
-  100% { left: 200%; }
 }
 
 /* Cụm bên phải: Hi... + Buttons */
@@ -45,63 +20,57 @@
 /* Lời chào "Hi ..." */
 .topbar-greeting {
   font-weight: 600 !important;
-  color: #fff !important;
-  text-shadow: 0 0 5px #d4af37; /* Phát sáng vàng */
+  color: #333 !important;
   margin-right: 8px !important;
 }
 
-/* 2. Nút "Add Photo" - Style Xanh lá (Cây thông) */
+/* 2. Nút "Add Photo" */
 .topbar-add-btn {
-  background-color: #1f4037 !important; /* Xanh đậm */
+  background-color: #1976d2 !important;
   color: #fff !important;
-  border: 1px solid #4cd137 !important;
-  border-radius: 20px !important; /* Bo tròn */
+  border-radius: 6px !important;
   text-transform: none !important;
-  font-weight: bold !important;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important;
-  transition: all 0.3s ease !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.12) !important;
+  transition: all 0.2s ease !important;
 }
 
 .topbar-add-btn:hover {
-  background-color: #27ae60 !important; /* Sáng hơn khi hover */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(76, 209, 55, 0.4) !important;
+  background-color: #1565c0 !important;
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.2) !important;
 }
 
-/* 3. Nút "Logout" - Style Đỏ (Ông già Noel) */
+/* 3. Nút "Logout" */
 .topbar-logout-btn {
   background-color: transparent !important;
-  color: #ffd700 !important; /* Chữ vàng */
-  border: 1px solid #ffd700 !important; /* Viền vàng */
-  border-radius: 20px !important;
+  color: #1976d2 !important;
+  border: 1px solid #1976d2 !important;
+  border-radius: 6px !important;
   text-transform: none !important;
-  font-weight: bold !important;
+  font-weight: 600 !important;
 }
 
 .topbar-logout-btn:hover {
-  background-color: #c0392b !important; /* Nền đỏ khi hover */
-  color: #fff !important;
-  border-color: #c0392b !important;
+  background-color: #f5f5f5 !important;
+  border-color: #1565c0 !important;
+  color: #1565c0 !important;
 }
 
 /* 4. MODAL ADD PHOTO (Dialog) */
-/* Phần tiêu đề Modal */
 .MuiDialogTitle-root {
-  background: #8e0e00; /* Nền đỏ */
-  color: #fff;
-  border-bottom: 2px solid #d4af37;
+  background: #f5f5f5;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
   text-align: center;
-  font-weight: bold !important;
+  font-weight: 600 !important;
 }
 
-/* Phần nội dung Modal */
 .MuiDialogContent-root {
-  background-color: #fffcf5; /* Nền kem */
+  background-color: #ffffff;
   padding-top: 20px !important;
 }
 
-/* Phần nút bấm trong Modal */
 .MuiDialogActions-root {
-  background-color: #fffcf5;
-  border-top: 1px solid #eee;
+  background-color: #f5f5f5;
+  border-top: 1px solid #e0e0e0;
 }

@@ -37,7 +37,6 @@ export default function Login({ onLoginSuccess }) {
     occupation: "",
   });
 
-  // lỗi theo từng field (hiện dưới ô)
   const [fieldError, setFieldError] = useState({
     login_name: "",
     password: "",
@@ -46,7 +45,6 @@ export default function Login({ onLoginSuccess }) {
     last_name: "",
   });
 
-  // ===== LOGIN HANDLER =====
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -70,6 +68,8 @@ export default function Login({ onLoginSuccess }) {
       }
 
       const user = await res.json();
+      // Save user to localStorage
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
       onLoginSuccess(user);
       navigate(`/users/${user._id}`);
     } catch (err) {
@@ -365,7 +365,6 @@ export default function Login({ onLoginSuccess }) {
               </Typography>
             )}
 
-            {/* ✅ NÚT LUÔN SÁNG */}
             <Button
               type="submit"
               variant="contained"

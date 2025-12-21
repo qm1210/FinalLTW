@@ -1,37 +1,35 @@
-/* components/UserPhotos/styles.css */
+/* UserPhotos styles */
 
-/* Tổng thể khung chứa ảnh (có thanh cuộn) */
+/* Container */
 .photo-feed-container {
-  height: calc(100vh - 100px); /* Trừ đi chiều cao TopBar */
+  height: calc(100vh - 100px);
   overflow-y: auto;
   padding: 10px;
-  background-color: transparent; /* Để lộ nền đỏ/xanh của trang chính */
+  background-color: transparent;
 }
 
-/* Tùy chỉnh thanh cuộn cho đẹp */
 .photo-feed-container::-webkit-scrollbar {
   width: 8px;
 }
 .photo-feed-container::-webkit-scrollbar-thumb {
-  background-color: #d4af37; /* Vàng */
+  background-color: #1976d2;
   border-radius: 4px;
 }
 
-/* --- TẤM THIỆP ẢNH (Card) --- */
+/* Photo card */
 .christmas-photo-card {
-  background-color: #fffcf5 !important; /* Màu kem */
-  border: 2px solid #d4af37; /* Viền vàng */
+  background-color: #ffffff !important;
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 30px;
-  box-shadow: 0 8px 20px rgba(142, 14, 0, 0.15); /* Bóng đỏ nhẹ */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
   position: relative;
 }
 
-/* Ngày tháng đăng ảnh */
+/* Photo date */
 .photo-date {
-  color: #8e0e00; /* Đỏ đậm */
-  font-weight: bold;
+  color: #666 !important;
+  font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 10px !important;
   display: flex;
@@ -39,69 +37,68 @@
   gap: 5px;
 }
 
-/* --- KHUNG ẢNH --- */
+/* Photo frame */
 .photo-frame {
   width: 100%;
   border-radius: 8px;
-  border: 4px solid #1f4037; /* Viền xanh đậm như cây thông */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  transition: transform 0.3s ease;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
 }
 
 .photo-frame:hover {
-  transform: scale(1.01); /* Phóng to nhẹ khi di chuột */
+  transform: scale(1.01);
 }
 
-/* --- PHẦN BÌNH LUẬN --- */
+/* Comments section */
 .comments-section {
   margin-top: 15px;
-  border-top: 1px dashed #d4af37; /* Đường kẻ đứt nét vàng */
+  border-top: 1px solid #e0e0e0;
   padding-top: 10px;
 }
 
-/* Từng dòng bình luận */
+/* Comment bubble */
 .comment-bubble {
-  background-color: rgba(31, 64, 55, 0.05); /* Nền xanh rất nhạt */
+  background-color: #f5f5f5;
   padding: 8px 12px;
   border-radius: 8px;
   margin-bottom: 8px;
   font-size: 0.95rem;
 }
 
-/* Tên người bình luận */
+/* Comment author */
 .comment-author {
-  color: #1f4037; /* Xanh đậm */
-  font-weight: bold;
+  color: #1976d2;
+  font-weight: 600;
   text-decoration: none;
   margin-right: 5px;
 }
 
 .comment-author:hover {
-  color: #c0392b; /* Đỏ khi hover */
+  color: #1565c0;
   text-decoration: underline;
 }
 
-/* Thời gian bình luận */
+/* Comment time */
 .comment-time {
   font-size: 0.75rem;
-  color: #888;
+  color: #999;
   margin-left: 5px;
 }
 
-/* Nút Comment */
+/* Post comment button */
 .post-comment-btn {
-  background-color: #8e0e00 !important; /* Đỏ đậm */
+  background-color: #1976d2 !important;
   color: white !important;
-  font-weight: bold !important;
+  font-weight: 600 !important;
   text-transform: none !important;
 }
 
 .post-comment-btn:hover {
-  background-color: #a91b0d !important;
+  background-color: #1565c0 !important;
 }
 
-/* Nút bị disable */
 .post-comment-btn.Mui-disabled {
-  background-color: #ddd !important;
+  background-color: #e0e0e0 !important;
   color: #999 !important;
 }
