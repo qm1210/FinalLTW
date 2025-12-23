@@ -18,7 +18,7 @@ import "./styles.css";
 // ✅ Link Backend
 const BASE = "https://q75ylp-8080.csb.app";
 
-function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
+function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess, onProfileUpdate }) {
   const location = useLocation();
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -38,6 +38,73 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
   const [newPassword, setNewPassword] = React.useState("");
   const [newPasswordConfirm, setNewPasswordConfirm] = React.useState("");
   const [changingPassword, setChangingPassword] = React.useState(false);
+
+  // Modal edit profile
+  const [openEditProfile, setOpenEditProfile] = React.useState(false);
+  const [editingProfile, setEditingProfile] = React.useState(false);
+  const [profileData, setProfileData] = React.useState({
+    first_name: "",
+    last_name: "",
+    location: "",
+    description: "",
+    occupation: "",
+  });
+
+  // Update profileData whenever loggedInUser changes
+  React.useEffect(() => {
+    if (loggedInUser) {
+      setProfileData({
+        first_name: loggedInUser.first_name || "",
+        last_name: loggedInUser.last_name || "",
+        location: loggedInUser.location || "",
+        description: loggedInUser.description || "",
+        occupation: loggedInUser.occupation || "",
+      });
+    }
+  }, [loggedInUser]);
+
+  // Update profile handler
+  const handleEditProfile = async () => {
+    if (!profileData.first_name || !profileData.last_name) {
+      alert("First name and Last name are required");
+      return;
+    }
+
+    setEditingProfile(true);
+    try {
+      const res = await fetch(`${BASE}/api/admin/update-profile`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!res.ok) {
+        const errorMsg = await res.text();
+        alert("Error: " + errorMsg);
+        return;
+      }
+
+      const updatedUser = await res.json();
+      
+      // Update loggedInUser state
+      setLoggedInUser(updatedUser);
+      localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+      
+      // Notify parent to refresh UserDetail
+      onProfileUpdate && onProfileUpdate();
+      
+      alert("Profile updated successfully!");
+      setOpenEditProfile(false);
+    } catch (err) {
+      console.error(err);
+      alert("Error updating profile");
+    } finally {
+      setEditingProfile(false);
+    }
+  };
 
   // Upload handler
   const handleUpload = async () => {
@@ -150,6 +217,36 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
                 onClick={() => setOpenAdd(true)}
               >
                 Add Photo
+              </Button>
+
+              <Button
+                className="topbar-edit-profile-btn"
+                variant="contained"
+                sx={{ textTransform: "none" }}
+                onClick={async () => {
+                  if (loggedInUser?._id) {
+                    try {
+                      const res = await fetch(`${BASE}/api/user/${loggedInUser._id}`, {
+                        credentials: "include",
+                      });
+                      if (res.ok) {
+                        const userData = await res.json();
+                        setProfileData({
+                          first_name: userData.first_name || "",
+                          last_name: userData.last_name || "",
+                          location: userData.location || "",
+                          description: userData.description || "",
+                          occupation: userData.occupation || "",
+                        });
+                      }
+                    } catch (err) {
+                      console.error("Error fetching user data:", err);
+                    }
+                  }
+                  setOpenEditProfile(true);
+                }}
+              >
+                Edit Profile
               </Button>
 
               <Button
@@ -289,6 +386,97 @@ function TopBar({ loggedInUser, setLoggedInUser, onUploadSuccess }) {
               <CircularProgress size={18} color="inherit" />
             ) : (
               "Change"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openEditProfile}
+        onClose={() => !editingProfile && setOpenEditProfile(false)}
+      >
+        <DialogTitle>Edit Profile</DialogTitle>
+
+        <DialogContent>
+          <TextField
+            label="First Name"
+            fullWidth
+            margin="normal"
+            value={profileData.first_name}
+            onChange={(e) =>
+              setProfileData((prev) => ({ ...prev, first_name: e.target.value }))
+            }
+            disabled={editingProfile}
+            required
+          />
+          <TextField
+            label="Last Name"
+            fullWidth
+            margin="normal"
+            value={profileData.last_name}
+            onChange={(e) =>
+              setProfileData((prev) => ({ ...prev, last_name: e.target.value }))
+            }
+            disabled={editingProfile}
+            required
+          />
+          <TextField
+            label="Location"
+            fullWidth
+            margin="normal"
+            value={profileData.location}
+            onChange={(e) =>
+              setProfileData((prev) => ({ ...prev, location: e.target.value }))
+            }
+            disabled={editingProfile}
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            margin="normal"
+            value={profileData.description}
+            onChange={(e) =>
+              setProfileData((prev) => ({
+                ...prev,
+                description: e.target.value,
+              }))
+            }
+            disabled={editingProfile}
+            multiline
+            rows={3}
+          />
+          <TextField
+            label="Occupation"
+            fullWidth
+            margin="normal"
+            value={profileData.occupation}
+            onChange={(e) =>
+              setProfileData((prev) => ({
+                ...prev,
+                occupation: e.target.value,
+              }))
+            }
+            disabled={editingProfile}
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() => setOpenEditProfile(false)}
+            disabled={editingProfile}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleEditProfile}
+            disabled={editingProfile}
+          >
+            {editingProfile ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              "Save"
             )}
           </Button>
         </DialogActions>

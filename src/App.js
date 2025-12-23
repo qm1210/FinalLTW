@@ -19,6 +19,7 @@ const App = (props) => {
   });
   const userPhotosRef = React.useRef(null);
   const userListRef = React.useRef(null);
+  const userDetailRef = React.useRef(null);
 
   const handleUploadSuccess = () => {
     if (userPhotosRef.current) {
@@ -27,6 +28,17 @@ const App = (props) => {
     // Refresh bubble stats
     if (userListRef.current) {
       userListRef.current.refreshStats();
+    }
+  };
+
+  const handleProfileUpdate = () => {
+    // Refresh UserDetail if viewing the logged-in user's profile
+    if (userDetailRef.current && loggedInUser) {
+      userDetailRef.current.refresh();
+    }
+    // Refresh UserList to update user names
+    if (userListRef.current) {
+      userListRef.current.refresh();
     }
   };
 
@@ -39,6 +51,7 @@ const App = (props) => {
               loggedInUser={loggedInUser}
               setLoggedInUser={setLoggedInUser}
               onUploadSuccess={handleUploadSuccess}
+              onProfileUpdate={handleProfileUpdate}
             />
           </Grid>
 
@@ -62,7 +75,7 @@ const App = (props) => {
                   <Routes>
                     <Route
                       path="/users/:userId"
-                      element={<UserDetail />}
+                      element={<UserDetail ref={userDetailRef} />}
                     />
                     <Route
                       path="/photos/:userId"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { Typography, Box, Button, Paper, CircularProgress } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
 import "./styles.css";
@@ -6,30 +6,37 @@ import "./styles.css";
 // Backend URL
 const BASE = "https://q75ylp-8080.csb.app";
 
-function UserDetail() {
+const UserDetail = forwardRef((props, ref) => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Fetch user data
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await fetch(`${BASE}/api/user/${userId}`, {
-           credentials: "include" 
-        });
+  const getUser = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/user/${userId}`, {
+         credentials: "include" 
+      });
 
-        if (!res.ok) throw new Error("Could not fetch user");
-        const data = await res.json();
-        setUser(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      if (!res.ok) throw new Error("Could not fetch user");
+      const data = await res.json();
+      setUser(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     getUser();
   }, [userId]);
+
+  // Expose refresh function to parent
+  useImperativeHandle(ref, () => ({
+    refresh: getUser,
+  }));
 
   if (loading) 
     return (
@@ -87,6 +94,6 @@ function UserDetail() {
       </Paper>
     </div>
   );
-}
+});
 
 export default UserDetail;

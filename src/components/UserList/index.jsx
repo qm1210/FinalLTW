@@ -20,33 +20,32 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
   const [loading, setLoading] = useState(false);
   const [userStats, setUserStats] = useState({});
 
-  useEffect(() => {
-    // Don't fetch if not logged in
+  const getUsers = async () => {
     if (!loggedInUser) {
       setUsers([]);
       return;
     }
 
-    const getUsers = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`${BASE}/api/user/list`, {
-           credentials: "include" 
-        });
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/user/list`, {
+         credentials: "include" 
+      });
 
-        if (!res.ok) throw new Error("Failed to fetch users");
-        const data = await res.json();
-        setUsers(data);
-        
-        // Fetch stats for each user
-        fetchUserStats(data);
-      } catch (err) {
-        console.error("Error fetching user list:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const data = await res.json();
+      setUsers(data);
+      
+      // Fetch stats for each user
+      fetchUserStats(data);
+    } catch (err) {
+      console.error("Error fetching user list:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     getUsers();
   }, [loggedInUser]);
 
@@ -82,12 +81,15 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
     setUserStats(stats);
   };
 
-  // Expose refreshStats function to parent via ref
+  // Expose refresh functions to parent via ref
   React.useImperativeHandle(ref, () => ({
     refreshStats: () => {
       fetchUserStats(users);
+    },
+    refresh: () => {
+      getUsers();
     }
-  }), [users]);
+  }), [users, loggedInUser]);
 
   // Not logged in - don't show anything
   if (!loggedInUser) return null;
