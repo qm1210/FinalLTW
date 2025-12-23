@@ -24,16 +24,32 @@ function UserComments({ loggedInUser }) {
           setUser(userData);
         }
 
-        // Fetch all photos for the user
-        const photosRes = await fetch(`${BASE}/api/photo/${userId}`, {
+        // Fetch all users to get all photos
+        const usersRes = await fetch(`${BASE}/api/user/list`, {
           credentials: "include"
         });
-        if (!photosRes.ok) throw new Error("Failed to fetch photos");
-        const photos = await photosRes.json();
+        if (!usersRes.ok) throw new Error("Failed to fetch users");
+        const users = await usersRes.json();
+
+        // Fetch all photos from all users
+        const allPhotos = [];
+        for (const user of users) {
+          try {
+            const photosRes = await fetch(`${BASE}/api/photo/${user._id}`, {
+              credentials: "include"
+            });
+            if (photosRes.ok) {
+              const photos = await photosRes.json();
+              allPhotos.push(...photos);
+            }
+          } catch (err) {
+            console.error(`Error fetching photos for user ${user._id}:`, err);
+          }
+        }
 
         // Aggregate all comments authored by this user from all photos in system
         const allComments = [];
-        for (const photo of photos) {
+        for (const photo of allPhotos) {
           if (photo.comments && Array.isArray(photo.comments)) {
             for (const comment of photo.comments) {
               if (comment.user && comment.user._id === userId) {
@@ -41,7 +57,8 @@ function UserComments({ loggedInUser }) {
                   ...comment,
                   photoId: photo._id,
                   photoFileName: photo.file_name,
-                  photoDate: photo.date_time
+                  photoDate: photo.date_time,
+                  photoOwnerId: photo.user_id
                 });
               }
             }
@@ -100,7 +117,7 @@ function UserComments({ loggedInUser }) {
                 {/* Photo thumbnail */}
                 <Grid item xs={3} sm={2}>
                   <Link 
-                    to={`/photos/${userId}?photoId=${comment.photoId}`}
+                    to={`/photos/${comment.photoOwnerId}?photoId=${comment.photoId}`}
                     className="photo-thumbnail-link"
                   >
                     <img 
@@ -119,7 +136,7 @@ function UserComments({ loggedInUser }) {
                     </Typography>
                     
                     <Link 
-                      to={`/photos/${userId}?photoId=${comment.photoId}`}
+                      to={`/photos/${comment.photoOwnerId}?photoId=${comment.photoId}`}
                       className="comment-text-link"
                     >
                       <Typography variant="body1" className="comment-text">

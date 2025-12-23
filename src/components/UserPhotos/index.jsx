@@ -6,7 +6,7 @@ import "./styles.css";
 // Backend URL
 const BASE = "https://q75ylp-8080.csb.app";
 
-const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
+const UserPhotos = React.forwardRef(({ loggedInUser, onCommentChange, onPhotoChange }, ref) => {
   const { userId } = useParams();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +99,9 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
 
       // Clear input
       setNewComments((prev) => ({ ...prev, [photoId]: "" }));
+      
+      // Notify parent to refresh stats
+      onCommentChange && onCommentChange();
     } catch (e) {
       console.error(e);
       alert("Failed to post comment");
@@ -126,6 +129,9 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
       // Remove photo from state
       setPhotos((prevPhotos) => prevPhotos.filter((p) => p._id !== photoId));
       alert("Photo deleted successfully");
+      
+      // Notify parent to refresh stats
+      onPhotoChange && onPhotoChange();
     } catch (err) {
       console.error(err);
       alert("Failed to delete photo");
@@ -175,6 +181,9 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
 
       setEditingCommentId(null);
       setEditCommentText("");
+      
+      // Notify parent to refresh stats (though edit doesn't change count, refresh anyway for consistency)
+      onCommentChange && onCommentChange();
     } catch (err) {
       console.error(err);
       alert("Failed to edit comment");
@@ -215,6 +224,9 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
       );
 
       alert("Comment deleted successfully");
+      
+      // Notify parent to refresh stats
+      onCommentChange && onCommentChange();
     } catch (err) {
       console.error(err);
       alert("Failed to delete comment");

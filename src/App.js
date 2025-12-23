@@ -31,6 +31,20 @@ const App = (props) => {
     }
   };
 
+  const handleCommentChange = () => {
+    // Refresh bubble stats when comment is added/edited/deleted
+    if (userListRef.current) {
+      userListRef.current.refreshStats();
+    }
+  };
+
+  const handlePhotoChange = () => {
+    // Refresh bubble stats when photo is deleted
+    if (userListRef.current) {
+      userListRef.current.refreshStats();
+    }
+  };
+
   const handleProfileUpdate = () => {
     // Refresh UserDetail if viewing the logged-in user's profile
     if (userDetailRef.current && loggedInUser) {
@@ -79,7 +93,14 @@ const App = (props) => {
                     />
                     <Route
                       path="/photos/:userId"
-                      element={<UserPhotos ref={userPhotosRef} loggedInUser={loggedInUser} />}
+                      element={
+                        <UserPhotos 
+                          ref={userPhotosRef} 
+                          loggedInUser={loggedInUser}
+                          onCommentChange={handleCommentChange}
+                          onPhotoChange={handlePhotoChange}
+                        />
+                      }
                     />
                     <Route
                       path="/comments/:userId"

@@ -52,28 +52,42 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
   const fetchUserStats = async (users) => {
     const stats = {};
     
+    // First, fetch all photos from all users to get all comments
+    const allPhotos = [];
     for (const user of users) {
       try {
-        // Get photo count
         const photoRes = await fetch(`${BASE}/api/photo/${user._id}`, {
           credentials: "include"
         });
-        const photos = photoRes.ok ? await photoRes.json() : [];
+        if (photoRes.ok) {
+          const photos = await photoRes.json();
+          allPhotos.push(...photos);
+        }
+      } catch (err) {
+        console.error(`Error fetching photos for user ${user._id}:`, err);
+      }
+    }
+    
+    // Now calculate stats for each user
+    for (const user of users) {
+      try {
+        // Get photo count (only photos owned by this user)
+        const userPhotos = allPhotos.filter(p => p.user_id === user._id);
         
-        // Count comments from all photos
+        // Count ALL comments made by this user across ALL photos (not just their own)
         let commentCount = 0;
-        for (const photo of photos) {
+        for (const photo of allPhotos) {
           if (photo.comments && Array.isArray(photo.comments)) {
             commentCount += photo.comments.filter(c => c.user && c.user._id === user._id).length;
           }
         }
         
         stats[user._id] = {
-          photoCount: photos.length,
+          photoCount: userPhotos.length,
           commentCount: commentCount
         };
       } catch (err) {
-        console.error(`Error fetching stats for user ${user._id}:`, err);
+        console.error(`Error calculating stats for user ${user._id}:`, err);
         stats[user._id] = { photoCount: 0, commentCount: 0 };
       }
     }
