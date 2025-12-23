@@ -13,6 +13,9 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
 
   // Store comments by photo ID
   const [newComments, setNewComments] = useState({});
+  
+  // Track deleting photos
+  const [deletingPhotoId, setDeletingPhotoId] = useState(null);
 
   // Fetch Photos
   const getPhotos = async () => {
@@ -95,6 +98,35 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
     }
   };
 
+  // Delete photo
+  const handleDeletePhoto = async (photoId) => {
+    if (!window.confirm("Are you sure you want to delete this photo?")) {
+      return;
+    }
+
+    setDeletingPhotoId(photoId);
+    try {
+      const res = await fetch(`${BASE}/api/photo/${photoId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg);
+      }
+
+      // Remove photo from state
+      setPhotos((prevPhotos) => prevPhotos.filter((p) => p._id !== photoId));
+      alert("Photo deleted successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete photo");
+    } finally {
+      setDeletingPhotoId(null);
+    }
+  };
+
   if (loading) return <Box p={3} textAlign="center"><CircularProgress style={{color: '#1976d2'}} /></Box>;
 
   if (!photos.length)
@@ -109,9 +141,27 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
       {photos.map((photo) => (
         <div key={photo._id} className="christmas-photo-card">
           
-          <Typography className="photo-date">
-            {new Date(photo.date_time).toLocaleString()}
-          </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+            <Typography className="photo-date">
+              {new Date(photo.date_time).toLocaleString()}
+            </Typography>
+            
+            {loggedInUser && loggedInUser._id === userId && (
+              <Button
+                size="small"
+                color="error"
+                variant="outlined"
+                onClick={() => handleDeletePhoto(photo._id)}
+                disabled={deletingPhotoId === photo._id}
+              >
+                {deletingPhotoId === photo._id ? (
+                  <CircularProgress size={16} />
+                ) : (
+                  "Delete"
+                )}
+              </Button>
+            )}
+          </Box>
 
           <img 
             src={`${BASE}/images/${photo.file_name}`}
