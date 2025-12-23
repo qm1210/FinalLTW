@@ -17,6 +17,13 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
   // Track deleting photos
   const [deletingPhotoId, setDeletingPhotoId] = useState(null);
 
+  // Track editing comments
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  
+  // Track deleting comments
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
+
   // Fetch Photos
   const getPhotos = async () => {
     setLoading(true);
@@ -127,6 +134,95 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
     }
   };
 
+  // Edit comment
+  const handleEditComment = async (photoId, commentId, newText) => {
+    if (!newText.trim()) {
+      alert("Comment cannot be empty");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${BASE}/api/photo/comment/${commentId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ comment: newText }),
+        }
+      );
+
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg);
+      }
+
+      // Update UI
+      setPhotos((prevPhotos) =>
+        prevPhotos.map((p) =>
+          p._id === photoId
+            ? {
+                ...p,
+                comments: p.comments.map((c) =>
+                  c._id === commentId
+                    ? { ...c, comment: newText }
+                    : c
+                ),
+              }
+            : p
+        )
+      );
+
+      setEditingCommentId(null);
+      setEditCommentText("");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to edit comment");
+    }
+  };
+
+  // Delete comment
+  const handleDeleteComment = async (photoId, commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) {
+      return;
+    }
+
+    setDeletingCommentId(commentId);
+    try {
+      const res = await fetch(
+        `${BASE}/api/photo/comment/${commentId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg);
+      }
+
+      // Remove comment from state
+      setPhotos((prevPhotos) =>
+        prevPhotos.map((p) =>
+          p._id === photoId
+            ? {
+                ...p,
+                comments: p.comments.filter((c) => c._id !== commentId),
+              }
+            : p
+        )
+      );
+
+      alert("Comment deleted successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete comment");
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
+
   if (loading) return <Box p={3} textAlign="center"><CircularProgress style={{color: '#1976d2'}} /></Box>;
 
   if (!photos.length)
@@ -175,21 +271,90 @@ const UserPhotos = React.forwardRef(({ loggedInUser }, ref) => {
               {photo.comments && photo.comments.length > 0 ? (
                 photo.comments.map((c) => (
                   <div key={c._id} className="comment-bubble">
-                    <Typography variant="body2">
-                      {c.user ? (
-                        <Link to={`/users/${c.user._id}`} className="comment-author">
-                          {c.user.first_name} {c.user.last_name}:
-                        </Link>
-                      ) : (
-                        <span style={{ color: "gray", fontWeight: "bold" }}>Unknown: </span>
-                      )}
-                      
-                      {c.comment}
-                    </Typography>
-                    
-                    <span className="comment-time">
-                      {new Date(c.date_time).toLocaleString()}
-                    </span>
+                    {editingCommentId === c._id ? (
+                      <Box display="flex" gap={1} mb={1}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          value={editCommentText}
+                          onChange={(e) => setEditCommentText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleEditComment(photo._id, c._id, editCommentText);
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={() => handleEditComment(photo._id, c._id, editCommentText)}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setEditingCommentId(null);
+                            setEditCommentText("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </Box>
+                    ) : (
+                      <>
+                        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={0.5}>
+                          <Typography variant="body2">
+                            {c.user ? (
+                              <Link to={`/users/${c.user._id}`} className="comment-author">
+                                {c.user.first_name} {c.user.last_name}:
+                              </Link>
+                            ) : (
+                              <span style={{ color: "gray", fontWeight: "bold" }}>Unknown: </span>
+                            )}
+                            
+                            {c.comment}
+                          </Typography>
+
+                          {loggedInUser && loggedInUser._id === c.user?._id && (
+                            <Box display="flex" gap={0.5} ml={1}>
+                              <Button
+                                size="small"
+                                color="primary"
+                                variant="text"
+                                sx={{ minWidth: "auto", padding: "2px 6px", fontSize: "0.75rem" }}
+                                onClick={() => {
+                                  setEditingCommentId(c._id);
+                                  setEditCommentText(c.comment);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="small"
+                                color="error"
+                                variant="text"
+                                sx={{ minWidth: "auto", padding: "2px 6px", fontSize: "0.75rem" }}
+                                onClick={() => handleDeleteComment(photo._id, c._id)}
+                                disabled={deletingCommentId === c._id}
+                              >
+                                {deletingCommentId === c._id ? (
+                                  <CircularProgress size={12} />
+                                ) : (
+                                  "Delete"
+                                )}
+                              </Button>
+                            </Box>
+                          )}
+                        </Box>
+                        
+                        <span className="comment-time">
+                          {new Date(c.date_time).toLocaleString()}
+                        </span>
+                      </>
+                    )}
                   </div>
                 ))
               ) : (
