@@ -1,4 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle
+} from "react";
 import {
   Divider,
   List,
@@ -7,7 +12,8 @@ import {
   Typography,
   Paper,
   CircularProgress,
-  Box
+  Box,
+  TextField
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import "./styles.css";
@@ -15,10 +21,11 @@ import "./styles.css";
 // Backend URL
 const BASE = "https://q75ylp-8080.csb.app";
 
-const UserList = React.forwardRef(({ loggedInUser }, ref) => {
+const UserList = forwardRef(({ loggedInUser }, ref) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userStats, setUserStats] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getUsers = async () => {
     if (!loggedInUser) {
@@ -29,13 +36,13 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
     setLoading(true);
     try {
       const res = await fetch(`${BASE}/api/user/list`, {
-         credentials: "include" 
+        credentials: "include"
       });
 
       if (!res.ok) throw new Error("Failed to fetch users");
       const data = await res.json();
       setUsers(data);
-      
+
       // Fetch stats for each user
       fetchUserStats(data);
     } catch (err) {
@@ -51,9 +58,9 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
 
   const fetchUserStats = async (users) => {
     const stats = {};
-    
-    // First, fetch all photos from all users to get all comments
     const allPhotos = [];
+
+    // Fetch all photos from all users
     for (const user of users) {
       try {
         const photoRes = await fetch(`${BASE}/api/photo/${user._id}`, {
@@ -64,63 +71,78 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
           allPhotos.push(...photos);
         }
       } catch (err) {
-        console.error(`Error fetching photos for user ${user._id}:`, err);
+        console.error(
+          `Error fetching photos for user ${user._id}:`,
+          err
+        );
       }
     }
-    
-    // Now calculate stats for each user
+
+    // Calculate stats
     for (const user of users) {
-      try {
-        // Get photo count (only photos owned by this user)
-        const userPhotos = allPhotos.filter(p => p.user_id === user._id);
-        
-        // Count ALL comments made by this user across ALL photos (not just their own)
-        let commentCount = 0;
-        for (const photo of allPhotos) {
-          if (photo.comments && Array.isArray(photo.comments)) {
-            commentCount += photo.comments.filter(c => c.user && c.user._id === user._id).length;
-          }
+      const userPhotos = allPhotos.filter(
+        (p) => p.user_id === user._id
+      );
+
+      let commentCount = 0;
+      for (const photo of allPhotos) {
+        if (Array.isArray(photo.comments)) {
+          commentCount += photo.comments.filter(
+            (c) => c.user && c.user._id === user._id
+          ).length;
         }
-        
-        stats[user._id] = {
-          photoCount: userPhotos.length,
-          commentCount: commentCount
-        };
-      } catch (err) {
-        console.error(`Error calculating stats for user ${user._id}:`, err);
-        stats[user._id] = { photoCount: 0, commentCount: 0 };
       }
+
+      stats[user._id] = {
+        photoCount: userPhotos.length,
+        commentCount
+      };
     }
-    
+
     setUserStats(stats);
   };
 
-  // Expose refresh functions to parent via ref
-  React.useImperativeHandle(ref, () => ({
-    refreshStats: () => {
-      fetchUserStats(users);
-    },
-    refresh: () => {
-      getUsers();
-    }
-  }), [users, loggedInUser]);
+  // Expose functions to parent
+  useImperativeHandle(
+    ref,
+    () => ({
+      refresh: () => getUsers(),
+      refreshStats: () => fetchUserStats(users)
+    }),
+    [users, loggedInUser]
+  );
 
-  // Not logged in - don't show anything
+  // Filter users by search term
+  const filteredUsers = users.filter((user) => {
+    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase());
+  });
+
   if (!loggedInUser) return null;
 
   return (
     <Paper className="user-list-card" elevation={3}>
       <Typography variant="h5" className="list-header">
-        Users ({users.length})
+        Users ({filteredUsers.length})
       </Typography>
 
+      {/* Search box */}
+      <TextField
+        fullWidth
+        size="small"
+        placeholder="Search users..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        sx={{ mb: 2 }}
+      />
+
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-          <CircularProgress style={{ color: '#1976d2' }} />
-        </div>
+        <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+          <CircularProgress />
+        </Box>
       ) : (
         <List component="nav">
-          {users.map((user, index) => (
+          {filteredUsers.map((user, index) => (
             <React.Fragment key={user._id}>
               <ListItem className="christmas-list-item">
                 <Link
@@ -129,17 +151,20 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
                 >
                   <ListItemText
                     primary={`${user.first_name} ${user.last_name}`}
-                    primaryTypographyProps={{ className: "user-name-text" }}
+                    primaryTypographyProps={{
+                      className: "user-name-text"
+                    }}
                   />
                 </Link>
-                
+
                 {/* Count bubbles */}
                 <Box className="count-bubbles">
                   <span className="count-bubble photo-count">
                     {userStats[user._id]?.photoCount || 0}
                   </span>
-                  <Link 
-                    to={`/comments/${user._id}`} 
+
+                  <Link
+                    to={`/comments/${user._id}`}
                     className="count-bubble-link"
                   >
                     <span className="count-bubble comment-count">
@@ -148,9 +173,12 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
                   </Link>
                 </Box>
               </ListItem>
-              
-              {index < users.length - 1 && (
-                <Divider className="christmas-divider" variant="middle" />
+
+              {index < filteredUsers.length - 1 && (
+                <Divider
+                  className="christmas-divider"
+                  variant="middle"
+                />
               )}
             </React.Fragment>
           ))}
@@ -160,5 +188,5 @@ const UserList = React.forwardRef(({ loggedInUser }, ref) => {
   );
 });
 
-UserList.displayName = 'UserList';
+UserList.displayName = "UserList";
 export default UserList;
